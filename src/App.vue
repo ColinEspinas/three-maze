@@ -36,6 +36,10 @@ onMounted(() => {
 
 <template>
   <canvas id="three-scene" ref="canvas" />
+  <div class="debug">
+    x: {{ alpha }}
+    y: {{ beta }}
+  </div>
 </template>
 
 <style>
@@ -43,6 +47,16 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+.debug {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  padding: 1rem;
+  font-size: 1.5rem;
+  color: white;
 }
 
 #three-scene {
