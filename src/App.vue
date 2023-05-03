@@ -37,35 +37,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <canvas id="three-scene" ref="canvas" />
-  <div class="debug">
+  <canvas id="three-scene" ref="canvas" class="absolute w-screen h-screen inset-0" />
+  <div class="absolute left-0 top-0 p-4 text-white z-10">
     x: {{ Math.round(beta ?? 0) }}
     y: {{ Math.round(gamma ?? 0) }}
   </div>
 </template>
-
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-.debug {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  padding: 1rem;
-  font-size: 1.5rem;
-  color: white;
-}
-
-#three-scene {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-}
-</style>

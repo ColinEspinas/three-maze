@@ -12,7 +12,7 @@ export default defineConfig({
       ],
       dts: true,
       eslintrc: {
-        enabled: true, // <-- this
+        enabled: true,
       },
     }),
   ],
