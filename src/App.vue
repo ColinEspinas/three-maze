@@ -5,6 +5,8 @@ import { useDeviceOrientation } from '@vueuse/core'
 const canvas = ref(null)
 const { alpha, beta } = useDeviceOrientation()
 
+const degToRad = (deg: number) => deg * (Math.PI / 180)
+
 onMounted(() => {
   const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10)
   camera.position.z = 1
@@ -26,8 +28,8 @@ onMounted(() => {
 
   // animation
   function animation() {
-    mesh.rotation.x = beta.value ?? 0
-    mesh.rotation.y = alpha.value ?? 0
+    mesh.rotation.x = degToRad(beta.value ?? 0)
+    mesh.rotation.y = degToRad(alpha.value ?? 0)
 
     renderer.render(scene, camera)
   }
