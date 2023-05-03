@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { useDeviceOrientation } from '@vueuse/core'
 
 const canvas = ref(null)
-const { beta, gamma } = useDeviceOrientation()
+const { alpha, beta, gamma } = useDeviceOrientation()
 
 const degToRad = (deg: number) => deg * (Math.PI / 180)
 
@@ -30,6 +30,7 @@ onMounted(() => {
   function animation() {
     mesh.rotation.x = degToRad(beta.value ?? 0)
     mesh.rotation.y = degToRad(gamma.value ?? 0)
+    mesh.rotation.z = degToRad(alpha.value ?? 0)
 
     renderer.render(scene, camera)
   }
@@ -41,5 +42,6 @@ onMounted(() => {
   <div class="absolute left-0 top-0 p-4 text-white z-10">
     x: {{ Math.round(beta ?? 0) }}
     y: {{ Math.round(gamma ?? 0) }}
+    z: {{ Math.round(alpha ?? 0) }}
   </div>
 </template>
