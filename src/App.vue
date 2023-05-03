@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import * as THREE from 'three'
 import { useDeviceOrientation } from '@vueuse/core'
+import { useDataPoint } from './composables/useDataPoint'
 
 const canvas = ref(null)
 const { alpha, beta, gamma } = useDeviceOrientation()
+
+const { roundedValue: dataPointValue, push: pushInDataPoint } = useDataPoint({ data: [0], range: 1000 })
 
 const degToRad = (deg: number) => deg * (Math.PI / 180)
 
@@ -30,7 +33,9 @@ onMounted(() => {
   function animation() {
     mesh.rotation.x = degToRad(beta.value ?? 0)
     mesh.rotation.y = degToRad(gamma.value ?? 0)
-    mesh.rotation.z = degToRad(alpha.value ?? 0)
+    mesh.rotation.z = degToRad(alpha.value ?? 0) / 2
+
+    pushInDataPoint(alpha.value ?? 0)
 
     renderer.render(scene, camera)
   }
@@ -43,5 +48,6 @@ onMounted(() => {
     x: {{ Math.round(beta ?? 0) }}
     y: {{ Math.round(gamma ?? 0) }}
     z: {{ Math.round(alpha ?? 0) }}
+    dataPoint: {{ dataPointValue }}
   </div>
 </template>
