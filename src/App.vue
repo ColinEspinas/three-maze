@@ -39,8 +39,8 @@ onMounted(() => {
 <template>
   <canvas id="three-scene" ref="canvas" />
   <div class="debug">
-    x: {{ beta }}
-    y: {{ gamma }}
+    x: {{ Math.round(beta ?? 0) }}
+    y: {{ Math.round(gamma ?? 0) }}
   </div>
 </template>
 
