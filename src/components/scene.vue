@@ -3,7 +3,6 @@ import { useDeviceOrientation } from '@vueuse/core'
 import { degToRad } from 'three/src/math/MathUtils.js'
 import { useDataPoint } from '../composables/useDataPoint'
 import { useThree } from '../composables/useThree'
-import mazeFile from '../assets/maze.gltf'
 
 const {
   createScene,
@@ -26,7 +25,7 @@ const scene = createScene()
 const camera = createCamera({})
 // const cube = createCube(scene, 0.2, 0.2, 0.2)
 createDirectionalLight(scene, 0xFFFFFF, 0.5)
-const maze = await createModel(scene, mazeFile, 0, 0, 0, 0.005)
+const maze = await createModel(scene, 'maze.gltf', 0, 0, 0, 0.005)
 
 // Three loop function
 function animate() {
