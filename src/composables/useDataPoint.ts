@@ -1,6 +1,8 @@
 export function useDataPoint(options: { data: number[]; range: number }) {
   const data = ref(options.data)
   const range = ref(options.range)
+  const max = ref(0)
+  const min = ref(0)
 
   // Get the average of the last n data points
   const result = computed(() => {
@@ -13,10 +15,18 @@ export function useDataPoint(options: { data: number[]; range: number }) {
 
   // Push a new data point
   const push = (value: number) => {
-    data.value.push(value)
-    // Remove the first data point if we have more than n
-    if (data.value.length > range.value)
-      data.value.shift()
+    if (value !== null) {
+      data.value.push(value)
+      // Get if the new data point is the max or min
+      if (value > max.value)
+        max.value = value
+      if (value < min.value)
+        min.value = value
+
+      // Remove the first data point if we have more than n
+      if (data.value.length > range.value)
+        data.value.shift()
+    }
   }
 
   return {
@@ -24,5 +34,7 @@ export function useDataPoint(options: { data: number[]; range: number }) {
     range,
     push,
     rounded,
+    max,
+    min,
   }
 }

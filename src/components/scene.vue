@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useDeviceOrientation } from '@vueuse/core'
-import { degToRad } from 'three/src/math/MathUtils.js'
+import { useDeviceMotion, useDeviceOrientation } from '@vueuse/core'
+import * as THREE from 'three'
 import { useDataPoint } from '../composables/useDataPoint'
 import { useThree } from '../composables/useThree'
+import { useMath } from '../composables/useMath'
 
 const {
   createScene,
@@ -12,7 +13,8 @@ const {
   setRender,
   canvas,
 } = useThree()
-// const { degToRad } = useMath()
+
+const { degToRad } = useMath()
 
 // Device orientation data
 const { alpha, beta, gamma } = useDeviceOrientation()
@@ -20,26 +22,80 @@ const rotationAlpha = useDataPoint({ data: [0], range: 1 })
 const rotationBeta = useDataPoint({ data: [0], range: 1 })
 const rotationGamma = useDataPoint({ data: [0], range: 1 })
 
+// Device motion data
+const {
+  acceleration,
+} = useDeviceMotion()
+const derivateDataPoint = useDataPoint({ data: [0], range: 1000 })
+
+const norm = computed(() => {
+  if (
+    acceleration.value !== null
+    && acceleration.value.x !== null
+    && acceleration.value?.y !== null
+    && acceleration.value?.z !== null
+  ) {
+    return (
+      acceleration.value.x ** 2
+      + acceleration.value.y ** 2
+      + acceleration.value.z ** 2
+    ) ** 2
+  }
+  return 0
+})
+
+const clock = new THREE.Clock()
+const oldNorm = ref(0)
+const derivate = ref(0)
+// float derivate_ = 10.0 * abs(norm_ - oldData) /  deltaTimeSensor;
+// oldData = norm_;
+
 // Three objects
 const scene = createScene()
 const camera = createCamera({})
-// const cube = createCube(scene, 0.2, 0.2, 0.2)
 createDirectionalLight(scene, 0xFFFFFF, 0.5)
-const maze = await createModel(scene, 'maze.gltf', 0, 0, 0, 0.005)
+const roundMaze = await createModel(scene, 'maze.gltf', 0, 0, 0, 0.005)
+const squareMaze = await createModel(scene, 'ballmazefirst.gltf', 0, 0, 0, 0.007)
+let squareIsDisplayed = false
+let switchCooldown = 0
 
 // Three loop function
 function animate() {
+  if (norm.value !== null && typeof norm.value !== 'undefined') {
+    derivate.value = Math.abs(norm.value - oldNorm.value) / ((clock.getDelta() || 0.001) * 1000)
+    oldNorm.value = norm.value
+    derivateDataPoint.push(derivate.value)
+  }
+
+  if (derivate.value > 200000 && switchCooldown > 60) {
+    squareIsDisplayed = !squareIsDisplayed
+    switchCooldown = 0
+  }
+  if (switchCooldown < 80)
+    switchCooldown += 1
+
   rotationAlpha.push(alpha.value ?? 0)
   rotationBeta.push(beta.value ?? 0)
   rotationGamma.push(gamma.value ?? 0)
 
-  maze.scene.rotation.x = degToRad(rotationBeta.result.value ?? 0)
-  maze.scene.rotation.y = degToRad(rotationGamma.result.value ?? 0)
-  maze.scene.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
+  if (!squareIsDisplayed) {
+    // Set visibility of the maze
+    roundMaze.scene.visible = true
+    squareMaze.scene.visible = false
 
-  // cube.mesh.rotation.x = degToRad(rotationBeta.result.value ?? 0)
-  // cube.mesh.rotation.y = degToRad(rotationGamma.result.value ?? 0)
-  // cube.mesh.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
+    roundMaze.scene.rotation.x = degToRad(rotationBeta.result.value ?? 0)
+    roundMaze.scene.rotation.y = degToRad(rotationGamma.result.value ?? 0)
+    roundMaze.scene.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
+  }
+  else {
+    // Set visibility of the maze
+    roundMaze.scene.visible = false
+    squareMaze.scene.visible = true
+
+    squareMaze.scene.rotation.x = degToRad(rotationBeta.result.value ?? 0)
+    squareMaze.scene.rotation.y = degToRad(rotationGamma.result.value ?? 0)
+    squareMaze.scene.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
+  }
 }
 
 setRender(scene, camera, animate)
@@ -51,5 +107,8 @@ setRender(scene, camera, animate)
     x: {{ Math.round(rotationBeta.result.value ?? 0) }}
     y: {{ Math.round(rotationGamma.result.value ?? 0) }}
     z: {{ Math.round(rotationAlpha.result.value ?? 0) }}
+    derivate: {{ Math.round(derivateDataPoint.result.value ?? 0) }}
+    max: {{ derivateDataPoint.max }}
+    min: {{ derivateDataPoint.min }}
   </div>
 </template>
