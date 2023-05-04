@@ -1,33 +1,46 @@
 <script setup lang="ts">
 import { useDeviceOrientation } from '@vueuse/core'
+import { degToRad } from 'three/src/math/MathUtils.js'
 import { useDataPoint } from '../composables/useDataPoint'
 import { useThree } from '../composables/useThree'
+import mazeFile from '../assets/maze.gltf'
 
+const {
+  createScene,
+  createCamera,
+  createModel,
+  createDirectionalLight,
+  setRender,
+  canvas,
+} = useThree()
+// const { degToRad } = useMath()
+
+// Device orientation data
 const { alpha, beta, gamma } = useDeviceOrientation()
 const rotationAlpha = useDataPoint({ data: [0], range: 1 })
 const rotationBeta = useDataPoint({ data: [0], range: 1 })
 const rotationGamma = useDataPoint({ data: [0], range: 1 })
 
-const degToRad = (deg: number) => deg * (Math.PI / 180)
-
-// async function setupPhysics(scene: THREE.Scene, meshes: THREE.Mesh[]) {
-//   const ammo = await Ammo.bind(window)()
-// }
-
-const { createScene, createCamera, createCube, setRender, canvas } = useThree()
-
+// Three objects
 const scene = createScene()
 const camera = createCamera({})
-const cube = createCube(scene, 0.2, 0.2, 0.2)
+// const cube = createCube(scene, 0.2, 0.2, 0.2)
+createDirectionalLight(scene, 0xFFFFFF, 0.5)
+const maze = await createModel(scene, mazeFile, 0, 0, 0, 0.005)
 
+// Three loop function
 function animate() {
   rotationAlpha.push(alpha.value ?? 0)
   rotationBeta.push(beta.value ?? 0)
   rotationGamma.push(gamma.value ?? 0)
 
-  cube.mesh.rotation.x = degToRad(rotationBeta.result.value ?? 0)
-  cube.mesh.rotation.y = degToRad(rotationGamma.result.value ?? 0)
-  cube.mesh.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
+  maze.scene.rotation.x = degToRad(rotationBeta.result.value ?? 0)
+  maze.scene.rotation.y = degToRad(rotationGamma.result.value ?? 0)
+  maze.scene.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
+
+  // cube.mesh.rotation.x = degToRad(rotationBeta.result.value ?? 0)
+  // cube.mesh.rotation.y = degToRad(rotationGamma.result.value ?? 0)
+  // cube.mesh.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
 }
 
 setRender(scene, camera, animate)

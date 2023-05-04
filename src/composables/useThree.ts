@@ -1,10 +1,12 @@
 import * as THREE from 'three'
+import type { GLTF } from 'three/addons/loaders/GLTFLoader.js'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 
 export function useThree() {
   const canvas = ref()
-  const meshes: THREE.Mesh[] = []
   let renderer: THREE.WebGLRenderer | undefined
   const render = ref(() => {})
+  const loader = new GLTFLoader()
 
   const setRender = (scene: THREE.Scene, camera: THREE.PerspectiveCamera, animate: () => void) => {
     render.value = () => {
@@ -42,8 +44,7 @@ export function useThree() {
     const material = new THREE.MeshNormalMaterial()
 
     const mesh = new THREE.Mesh(geometry, material)
-    meshes.push(mesh)
-    scene.add(...meshes)
+    scene.add(mesh)
 
     return {
       geometry,
@@ -52,24 +53,53 @@ export function useThree() {
     }
   }
 
+  const createModel = async (scene: THREE.Scene, file: string, x: number, y: number, z: number, scale: number): Promise<GLTF> => {
+    return new Promise((resolve, reject) => {
+      loader.load(
+        // resource URL
+        file,
+        // called when the resource is loaded
+        (gltf) => {
+          gltf.scene.position.set(x, y, z)
+          gltf.scene.scale.set(scale, scale, scale)
+          scene.add(gltf.scene)
+          resolve(gltf)
+        },
+        // called while loading is progressing
+        (xhr) => {
+          console.info(`${xhr.loaded / xhr.total * 100}% loaded`)
+        },
+        // called when loading has errors
+        (error) => {
+          reject(error)
+        },
+      )
+    })
+  }
+
+  const createDirectionalLight = (scene: THREE.Scene, color: number, intensity: number) => {
+    const directionalLight = new THREE.DirectionalLight(color, intensity)
+    directionalLight.position.set(1, 7, 2)
+    scene.add(directionalLight)
+  }
+
   onMounted(() => {
     renderer = new THREE.WebGLRenderer({
       antialias: true,
       canvas: canvas.value,
     })
-
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setAnimationLoop(() => render.value())
-    // document.body.appendChild(renderer.domElement)
   })
 
   return {
+    canvas,
     render,
-    meshes,
     setRender,
     createCamera,
     createScene,
     createCube,
-    canvas,
+    createModel,
+    createDirectionalLight,
   }
 }
