@@ -66,9 +66,7 @@ export function useThree() {
           resolve(gltf)
         },
         // called while loading is progressing
-        (xhr) => {
-          console.info(`${xhr.loaded / xhr.total * 100}% loaded`)
-        },
+        () => {},
         // called when loading has errors
         (error) => {
           reject(error)
@@ -79,8 +77,15 @@ export function useThree() {
 
   const createDirectionalLight = (scene: THREE.Scene, color: number, intensity: number) => {
     const directionalLight = new THREE.DirectionalLight(color, intensity)
-    directionalLight.position.set(1, 7, 2)
+    directionalLight.position.set(0, 100, 100)
     scene.add(directionalLight)
+    return directionalLight
+  }
+
+  const createAmbiantLight = (scene: THREE.Scene, color: number, intensity: number) => {
+    const ambiantLight = new THREE.AmbientLight(color, intensity)
+    scene.add(ambiantLight)
+    return ambiantLight
   }
 
   onMounted(() => {
@@ -101,5 +106,6 @@ export function useThree() {
     createCube,
     createModel,
     createDirectionalLight,
+    createAmbiantLight,
   }
 }

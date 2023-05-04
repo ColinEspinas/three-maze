@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useDeviceMotion, useDeviceOrientation } from '@vueuse/core'
 import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { useDataPoint } from '../composables/useDataPoint'
 import { useThree } from '../composables/useThree'
 import { useMath } from '../composables/useMath'
@@ -10,6 +11,7 @@ const {
   createCamera,
   createModel,
   createDirectionalLight,
+  createAmbiantLight,
   setRender,
   canvas,
 } = useThree()
@@ -27,7 +29,6 @@ const {
   acceleration,
 } = useDeviceMotion()
 const derivateDataPoint = useDataPoint({ data: [0], range: 1000 })
-
 const norm = computed(() => {
   if (
     acceleration.value !== null
@@ -43,21 +44,21 @@ const norm = computed(() => {
   }
   return 0
 })
-
-const clock = new THREE.Clock()
 const oldNorm = ref(0)
 const derivate = ref(0)
-// float derivate_ = 10.0 * abs(norm_ - oldData) /  deltaTimeSensor;
-// oldData = norm_;
+
+const clock = new THREE.Clock()
 
 // Three objects
 const scene = createScene()
 const camera = createCamera({})
-createDirectionalLight(scene, 0xFFFFFF, 0.5)
+createDirectionalLight(scene, 0xFFFFFF, 1)
+createAmbiantLight(scene, 0xFFFFFF, 1)
 const roundMaze = await createModel(scene, 'maze.gltf', 0, 0, 0, 0.005)
 const squareMaze = await createModel(scene, 'ballmazefirst.gltf', 0, 0, 0, 0.007)
 let squareIsDisplayed = false
 let switchCooldown = 0
+let controls: OrbitControls
 
 // Three loop function
 function animate() {
@@ -96,7 +97,16 @@ function animate() {
     squareMaze.scene.rotation.y = degToRad(rotationGamma.result.value ?? 0)
     squareMaze.scene.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
   }
+  if (controls)
+    controls.update()
 }
+
+onMounted(() => {
+  controls = new OrbitControls(camera, canvas.value)
+  controls.enableDamping = true
+  controls.screenSpacePanning = false
+  controls.target.set(0, 0, 0)
+})
 
 setRender(scene, camera, animate)
 </script>
