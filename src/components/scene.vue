@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import * as THREE from 'three'
 import { useDeviceOrientation } from '@vueuse/core'
 import { useDataPoint } from '../composables/useDataPoint'
+import { useThree } from '../composables/useThree'
 
-const canvas = ref(null)
 const { alpha, beta, gamma } = useDeviceOrientation()
 const rotationAlpha = useDataPoint({ data: [0], range: 1 })
 const rotationBeta = useDataPoint({ data: [0], range: 1 })
@@ -11,50 +10,27 @@ const rotationGamma = useDataPoint({ data: [0], range: 1 })
 
 const degToRad = (deg: number) => deg * (Math.PI / 180)
 
-async function setupScene() {
-  const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10)
-  camera.position.z = 1
+// async function setupPhysics(scene: THREE.Scene, meshes: THREE.Mesh[]) {
+//   const ammo = await Ammo.bind(window)()
+// }
 
-  const scene = new THREE.Scene()
-  // const ammo = await Ammo.bind(window)()
+const { createScene, createCamera, createCube, setRender, canvas } = useThree()
 
-  const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2)
-  const material = new THREE.MeshNormalMaterial()
+const scene = createScene()
+const camera = createCamera({})
+const cube = createCube(scene, 0.2, 0.2, 0.2)
 
-  const mesh = new THREE.Mesh(geometry, material)
-  scene.add(mesh)
-
-  const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    canvas: canvas.value || undefined,
-  })
-
-  renderer.setSize(window.innerWidth, window.innerHeight)
-  renderer.setAnimationLoop(() => render(
-    camera, scene, mesh, renderer,
-  ))
-}
-
-function render(
-  camera: THREE.PerspectiveCamera,
-  scene: THREE.Scene,
-  mesh: THREE.Mesh,
-  renderer: THREE.WebGLRenderer,
-) {
+function animate() {
   rotationAlpha.push(alpha.value ?? 0)
   rotationBeta.push(beta.value ?? 0)
   rotationGamma.push(gamma.value ?? 0)
 
-  mesh.rotation.x = degToRad(rotationBeta.result.value ?? 0)
-  mesh.rotation.y = degToRad(rotationGamma.result.value ?? 0)
-  mesh.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
-
-  renderer.render(scene, camera)
+  cube.mesh.rotation.x = degToRad(rotationBeta.result.value ?? 0)
+  cube.mesh.rotation.y = degToRad(rotationGamma.result.value ?? 0)
+  cube.mesh.rotation.z = degToRad(rotationAlpha.result.value ?? 0)
 }
 
-onMounted(async () => {
-  setupScene()
-})
+setRender(scene, camera, animate)
 </script>
 
 <template>
