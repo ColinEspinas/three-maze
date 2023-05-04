@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@vueuse/core": "^10.1.2",
+    "ammo.js": "github:kripken/ammo.js",
     "three": "^0.152.2",
     "vue": "^3.2.47"
   },
@@ -19,6 +20,7 @@
     "@antfu/eslint-config": "^0.38.5",
     "@types/three": "^0.151.0",
     "@vitejs/plugin-vue": "^4.1.0",
+    "ammojs-typed": "^1.0.6",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.39.0",
     "postcss": "^8.4.23",

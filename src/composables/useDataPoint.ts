@@ -3,12 +3,12 @@ export function useDataPoint(options: { data: number[]; range: number }) {
   const range = ref(options.range)
 
   // Get the average of the last n data points
-  const value = computed(() => {
+  const result = computed(() => {
     return data.value.slice(-range.value).reduce((a, b) => a + b, 0) / range.value
   })
 
-  const roundedValue = computed(() => {
-    return Math.round(value.value)
+  const rounded = computed(() => {
+    return Math.round(result.value)
   })
 
   // Push a new data point
@@ -20,9 +20,9 @@ export function useDataPoint(options: { data: number[]; range: number }) {
   }
 
   return {
-    value,
+    result,
     range,
     push,
-    roundedValue,
+    rounded,
   }
 }
